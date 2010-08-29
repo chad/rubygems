@@ -643,23 +643,26 @@ class TestGem < RubyGemTestCase
   end
 
   def test_load_plugins
-    with_plugin('load') { Gem.load_plugins }
+    assert_deprecation do
+      with_plugin('load', suppress_io = false) { Gem.load_deprecated_plugins }
+    end
     assert_equal :loaded, TEST_PLUGIN_LOAD
+
 
     util_remove_interrupt_command
 
     # Should attempt to cause a StandardError
-    with_plugin('standarderror') { Gem.load_plugins }
+    with_plugin('standarderror') { Gem.load_deprecated_plugins }
     assert_equal :loaded, TEST_PLUGIN_STANDARDERROR
 
     util_remove_interrupt_command
 
     # Should attempt to cause an Exception
-    with_plugin('exception') { Gem.load_plugins }
+    with_plugin('exception') { Gem.load_deprecated_plugins }
     assert_equal :loaded, TEST_PLUGIN_EXCEPTION
   end
 
-  def with_plugin(path)
+  def with_plugin(path, suppress_io = true)
     test_plugin_path = File.expand_path "../plugin/#{path}", __FILE__
 
     # A single test plugin should get loaded once only, in order to preserve
@@ -667,11 +670,23 @@ class TestGem < RubyGemTestCase
     refute_includes $LOAD_PATH, test_plugin_path
     $LOAD_PATH.unshift test_plugin_path
 
-    capture_io do
+    if suppress_io
+      capture_io do
+        yield
+      end
+    else
       yield
     end
   ensure
     $LOAD_PATH.delete test_plugin_path
+  end
+
+  def assert_deprecation(&block)
+    out, err = capture_io(&block) 
+   
+    unless %r%deprecated% =~ err
+      flunk "Expected code to print a deprecation warning. STDERR was #{err.inspect}"
+    end
   end
 
   def util_ensure_gem_dirs

@@ -979,16 +979,15 @@ module Gem
   ##
   # Find all 'rubygems_plugin' files and load them
 
-  def self.load_plugins
+  def self.load_deprecated_plugins
     plugins = Gem.find_files 'rubygems_plugin'
 
     plugins.each do |plugin|
-
       # Skip older versions of the GemCutter plugin: Its commands are in
       # RubyGems proper now.
 
       next if plugin =~ /gemcutter-0\.[0-3]/
-
+      warn "deprecated rubygems_plugin.rb found at #{plugin}"
       begin
         load plugin
       rescue ::Exception => e
@@ -1136,5 +1135,5 @@ require 'rubygems/custom_require' if gem_disabled or RUBY_VERSION < '1.9'
 
 Gem.clear_paths
 
-Gem.load_plugins
+Gem.load_deprecated_plugins
 
