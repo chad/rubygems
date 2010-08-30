@@ -149,7 +149,6 @@ class Gem::CommandManager
 
   def find_command_possibilities(cmd_name)
     len = cmd_name.length
-
     command_names.select { |n| cmd_name == n[0, len] }
   end
 
