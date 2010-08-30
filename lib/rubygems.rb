@@ -978,24 +978,27 @@ module Gem
 
   ##
   # Find all 'rubygems_plugin' files and load them
+  # These are deprecated. Use rubygems/command_plugin or rubygems/install_plugin
+  # instead.
 
   def self.load_deprecated_plugins
-    plugins = Gem.find_files 'rubygems_plugin'
-
-    plugins.each do |plugin|
-      # Skip older versions of the GemCutter plugin: Its commands are in
-      # RubyGems proper now.
-
-      next if plugin =~ /gemcutter-0\.[0-3]/
-      warn "deprecated rubygems_plugin.rb found at #{plugin}"
-      begin
-        load plugin
-      rescue ::Exception => e
-        details = "#{plugin.inspect}: #{e.message} (#{e.class})"
-        warn "Error loading RubyGems plugin #{details}"
-      end
-    end
+    load_plugins_from_path('rubygems_plugin', :deprecated => true)
   end
+
+  def self.load_plugins
+    load_deprecated_plugins
+  end
+
+  ##
+  # Find all 'rubygems/command_plugin' files and load them.
+  
+  def self.load_command_plugins
+    load_plugins_from_path('rubygems/command_plugin')
+  end
+  
+  
+
+
 
   class << self
 
@@ -1028,6 +1031,26 @@ module Gem
     # :stopdoc:
 
     alias cache source_index # an alias for the old name
+
+    private
+    
+    def load_plugins_from_path(path, options = {})
+      plugins = Gem.find_files path
+      
+      plugins.each do |plugin|
+        # Skip older versions of the GemCutter plugin: Its commands are in
+        # RubyGems proper now.
+
+        next if plugin =~ /gemcutter-0\.[0-3]/
+        warn "deprecated rubygems_plugin.rb found at #{plugin}" if options[:deprecated]
+        begin
+          load plugin
+        rescue ::Exception => e
+          details = "#{plugin.inspect}: #{e.message} (#{e.class})"
+          warn "Error loading RubyGems plugin #{details}"
+        end
+      end
+    end
 
     # :startdoc:
 

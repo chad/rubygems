@@ -187,6 +187,33 @@ class RubyGemTestCase < MiniTest::Unit::TestCase
     s = s.force_encoding(Encoding.default_external) if defined? Encoding
     s.chomp
   end
+  
+  def with_plugin(path, suppress_io = true)
+    test_plugin_path = File.expand_path "../plugin/#{path}", __FILE__
+
+    # A single test plugin should get loaded once only, in order to preserve
+    # sane test semantics.
+    refute_includes $LOAD_PATH, test_plugin_path
+    $LOAD_PATH.unshift test_plugin_path
+    if suppress_io
+      capture_io do
+        yield
+      end
+    else
+      yield
+    end
+  ensure
+    $LOAD_PATH.delete test_plugin_path
+  end
+
+  def assert_deprecation(&block)
+    out, err = capture_io(&block) 
+
+    unless %r%deprecated% =~ err
+      flunk "Expected code to print a deprecation warning. STDERR was #{err.inspect}"
+    end
+  end
+  
 
   def prep_cache_files(lc)
     @usr_si ||= Gem::SourceIndex.new

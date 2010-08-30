@@ -1,4 +1,5 @@
 require File.expand_path('../gemutilities', __FILE__)
+$:.unshift(File.dirname(__FILE__))
 require 'rubygems/command_manager'
 
 class TestGemCommandManager < RubyGemTestCase
@@ -20,11 +21,21 @@ class TestGemCommandManager < RubyGemTestCase
       assert_equal "ERROR:  Interrupted\n", ui.error
     end
   end
+  
+  def test_loads_command_plugins
+    with_plugin('load') do
+      $:.unshift File.join(File.dirname(__FILE__), "plugin/load")
+      clear_command_manager_singleton
+      @command_manager = Gem::CommandManager.instance
+      
+      assert_equal :loaded, TEST_PLUGIN_COMMAND_LOAD
+    end
+  end
 
   def test_run_crash_command
     @command_manager.register_command :crash
     use_ui @ui do
-      assert_raises MockGemUi::TermError do
+      assert_raises MockGemUi::TermError do        
         @command_manager.run 'crash'
       end
       assert_equal '', ui.output
@@ -201,6 +212,10 @@ class TestGemCommandManager < RubyGemTestCase
     assert_equal true, check_options[:generate_rdoc]
     assert_equal true, check_options[:force]
     assert_equal Dir.pwd, check_options[:install_dir]
+  end
+
+  def clear_command_manager_singleton
+    Gem::CommandManager.instance_variable_set "@command_manager", false
   end
 
 end

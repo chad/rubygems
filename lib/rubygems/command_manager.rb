@@ -72,6 +72,7 @@ class Gem::CommandManager
     register_command :unpack
     register_command :update
     register_command :which
+    Gem.load_command_plugins
   end
 
   ##

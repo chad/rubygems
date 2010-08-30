@@ -1,0 +1,1 @@
+::EXAMPLE_COMMAND_LOADED = :loaded
