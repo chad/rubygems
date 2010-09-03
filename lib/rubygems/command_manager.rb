@@ -12,11 +12,11 @@ require 'rubygems/user_interaction'
 # The command manager registers and installs all the individual sub-commands
 # supported by the gem command.
 #
-# Extra commands can be provided by writing a rubygems_plugin.rb
+# Extra commands can be provided by writing a rubygems/command_plugin.rb
 # file in an installed gem.  You should register your command against the
 # Gem::CommandManager instance, like this:
 #
-#   # file rubygems_plugin.rb
+#   # file rubygems/command_plugin.rb
 #   require 'rubygems/command_manager'
 #
 #   class Gem::Commands::EditCommand < Gem::Command
