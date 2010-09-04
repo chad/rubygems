@@ -995,7 +995,11 @@ module Gem
   def self.load_command_plugins
     load_plugins_from_path('rubygems/command_plugin')
   end
-  
+
+
+  ##
+  # Find all 'rubygems/install_plugin' files and load them.
+    
   def self.load_install_plugins
     load_plugins_from_path('rubygems/install_plugin')
   end  
